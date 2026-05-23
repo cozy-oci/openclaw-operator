@@ -224,6 +224,6 @@ spec:
   autoUpdate:
     enabled: true
     checkInterval: 24h
-    backupBeforeUpdate: true
+    backupBeforeUpdate: false
     rollbackOnFailure: true
     healthCheckTimeout: 15m
