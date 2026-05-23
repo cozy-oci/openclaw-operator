@@ -142,7 +142,7 @@ spec:
   tailscale:
     enabled: true
     mode: serve
-    hostname: openclaw-sidecar
+    hostname: openclaw
     authSSO: true
     authKeySecretRef:
       name: openclaw-tailscale-auth
