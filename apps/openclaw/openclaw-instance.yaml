@@ -26,12 +26,16 @@ spec:
           endpoint: http://localhost:4318
           metrics: true
       gateway:
+        auth:
+          allowTailscale: true
         bind: lan
 
   gateway:
     enabled: false
     controlUiOrigins:
       - https://openclaw.tail651fca.ts.net
+      - https://openclaw-sidecar.tail651fca.ts.net
+      - https://openclaw-sidecar-1.tail651fca.ts.net
 
   availability:
     affinity:
