@@ -1,0 +1,23 @@
+image:
+  repository: ghcr.io/openclaw-rocks/openclaw-operator
+  tag: "v0.30.0"
+  pullPolicy: IfNotPresent
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: prometheus
+
+networkPolicy:
+  enabled: true
+
+webhook:
+  enabled: false
+
+crds:
+  install: true
+  keep: true

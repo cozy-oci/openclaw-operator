@@ -1,0 +1,229 @@
+apiVersion: openclaw.rocks/v1alpha1
+kind: OpenClawInstance
+metadata:
+  name: openclaw
+  namespace: openclaw
+  labels:
+    app.kubernetes.io/name: openclaw
+    app.kubernetes.io/part-of: openclaw
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  image:
+    repository: ghcr.io/openclaw/openclaw
+    tag: "2026.5.2"
+    pullPolicy: IfNotPresent
+
+  config:
+    mergeMode: overwrite
+    raw:
+      agents:
+        defaults:
+          model:
+            primary: openai-codex/gpt-5.5
+      diagnostics:
+        otel:
+          endpoint: http://localhost:4318
+          metrics: true
+      gateway:
+        bind: lan
+
+  gateway:
+    enabled: false
+    controlUiOrigins:
+      - https://openclaw.tail651fca.ts.net
+
+  availability:
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - 10.0.10.75
+          - weight: 50
+            preference:
+              matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - 10.0.10.39
+
+  storage:
+    persistence:
+      enabled: true
+      existingClaim: openclaw-fss-pvc
+      orphan: true
+
+  security:
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      fsGroupChangePolicy: OnRootMismatch
+      runAsNonRoot: true
+    networkPolicy:
+      enabled: true
+      allowedIngressNamespaces:
+        - tailscale
+        - monitoring
+
+  resources:
+    requests:
+      cpu: "300m"
+      memory: "768Mi"
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+
+  probes:
+    liveness:
+      enabled: true
+      initialDelaySeconds: 60
+      periodSeconds: 30
+      timeoutSeconds: 20
+      failureThreshold: 60
+    readiness:
+      enabled: true
+      initialDelaySeconds: 10
+      periodSeconds: 30
+      timeoutSeconds: 20
+      failureThreshold: 40
+    startup:
+      enabled: true
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 60
+
+  observability:
+    metrics:
+      enabled: false
+      port: 9090
+      serviceMonitor:
+        enabled: false
+      prometheusRule:
+        enabled: false
+      grafanaDashboard:
+        enabled: false
+    logging:
+      level: info
+
+  selfConfigure:
+    enabled: true
+    allowedActions:
+      - skills
+      - config
+      - envVars
+      - workspaceFiles
+
+  chromium:
+    enabled: true
+    image:
+      repository: docker.io/chromedp/headless-shell
+      tag: stable
+    resources:
+      requests:
+        cpu: "25m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+    persistence:
+      enabled: false
+
+  tailscale:
+    enabled: true
+    mode: serve
+    hostname: openclaw-sidecar
+    authSSO: true
+    authKeySecretRef:
+      name: openclaw-tailscale-auth
+    authKeySecretKey: authkey
+    image:
+      repository: ghcr.io/tailscale/tailscale
+      tag: v1.96.5
+    resources:
+      requests:
+        cpu: "10m"
+        memory: "64Mi"
+      limits:
+        cpu: "200m"
+        memory: "256Mi"
+
+  sidecars:
+    - name: auth-profile-maintainer
+      image: docker.io/library/busybox:1.37
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - mkdir -p /home/openclaw/.openclaw/agents/main/agent && while true; do sleep 3600; done
+      volumeMounts:
+        - name: data
+          mountPath: /home/openclaw/.openclaw
+      resources:
+        requests:
+          cpu: "2m"
+          memory: "32Mi"
+        limits:
+          cpu: "100m"
+          memory: "128Mi"
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        capabilities:
+          drop:
+            - ALL
+    - name: openclaw-otel-collector
+      image: docker.io/otel/opentelemetry-collector:0.120.0
+      imagePullPolicy: IfNotPresent
+      args:
+        - --config=/etc/otel-collector/config.yaml
+      ports:
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+      volumeMounts:
+        - name: openclaw-otel-collector
+          mountPath: /etc/otel-collector/config.yaml
+          subPath: config.yaml
+          readOnly: true
+      resources:
+        requests:
+          cpu: "5m"
+          memory: "64Mi"
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        capabilities:
+          drop:
+            - ALL
+
+  sidecarVolumes:
+    - name: openclaw-otel-collector
+      configMap:
+        name: openclaw-otel-collector
+
+  runtimeDeps:
+    pnpm: true
+    python: true
+
+  autoUpdate:
+    enabled: true
+    checkInterval: 24h
+    backupBeforeUpdate: true
+    rollbackOnFailure: true
+    healthCheckTimeout: 15m

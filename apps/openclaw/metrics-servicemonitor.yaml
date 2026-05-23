@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: openclaw-custom
+  namespace: openclaw
+  labels:
+    app.kubernetes.io/name: openclaw
+    app.kubernetes.io/part-of: openclaw
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: openclaw
+      app.kubernetes.io/part-of: openclaw
+  namespaceSelector:
+    matchNames:
+      - openclaw
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+

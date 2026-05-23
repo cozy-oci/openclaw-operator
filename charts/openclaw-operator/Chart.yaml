@@ -1,0 +1,72 @@
+annotations:
+  artifacthub.io/category: ai-machine-learning
+  artifacthub.io/changes: |
+    - kind: added
+      description: PVC backup-on-delete and restore-from-backup via rclone/S3
+  artifacthub.io/crds: |
+    - kind: OpenClawInstance
+      version: v1alpha1
+      name: openclawinstances.openclaw.rocks
+      displayName: OpenClaw Instance
+      description: Represents a managed OpenClaw AI agent instance
+    - kind: OpenClawSelfConfig
+      version: v1alpha1
+      name: openclawselfconfigs.openclaw.rocks
+      displayName: OpenClaw Self-Config
+      description: A request from an agent to modify its own OpenClawInstance spec
+  artifacthub.io/crdsExamples: |
+    - apiVersion: openclaw.rocks/v1alpha1
+      kind: OpenClawInstance
+      metadata:
+        name: my-openclaw
+      spec:
+        envFrom:
+          - secretRef:
+              name: openclaw-api-keys
+        storage:
+          persistence:
+            enabled: true
+            size: 10Gi
+  artifacthub.io/images: |
+    - name: openclaw-operator
+      image: ghcr.io/openclaw-rocks/openclaw-operator:v0.9.0
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/links: |
+    - name: Website
+      url: https://openclaw.rocks
+    - name: Documentation
+      url: https://openclaw.rocks/docs/operator/0.10
+    - name: OperatorHub
+      url: https://operatorhub.io/operator/openclaw-operator
+    - name: Artifact Hub
+      url: https://artifacthub.io/packages/olm/community-operators/openclaw-operator
+    - name: support
+      url: https://github.com/OpenClaw-rocks/openclaw-operator/issues
+  artifacthub.io/operator: "true"
+  artifacthub.io/operatorCapabilities: Auto Pilot
+  artifacthub.io/prerelease: "false"
+apiVersion: v2
+appVersion: 0.30.0
+description: A Kubernetes operator for deploying and managing OpenClaw AI assistant
+  instances
+home: https://openclaw.rocks
+icon: https://openclaw.rocks/favicon.svg
+keywords:
+- kubernetes
+- operator
+- openclaw
+- ai
+- assistant
+- llm
+- automation
+- agent
+kubeVersion: '>=1.28.0-0'
+maintainers:
+- email: jannes@openclaw.rocks
+  name: Jannes Stubbemann
+  url: https://github.com/stubbi
+name: openclaw-operator
+sources:
+- https://github.com/OpenClaw-rocks/openclaw-operator
+type: application
+version: 0.30.0
