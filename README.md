@@ -4,7 +4,7 @@ GitOps manifests for deploying OpenClaw Operator and one OpenClaw instance on th
 
 ## Layout
 
-- `charts/openclaw-operator/`: vendored OpenClaw Operator Helm chart `0.30.0`.
+- `charts/openclaw-operator/`: vendored OpenClaw Operator Helm chart `0.34.4`.
 - `charts/openclaw-operator/values-oke.yaml`: OKE/Prometheus-specific chart values.
 - `apps/openclaw/`: OpenClaw namespace, OCI FSS PV/PVC, OpenClawInstance, and Tailscale-only ingress.
 - `argocd/`: Argo CD Application registrations.

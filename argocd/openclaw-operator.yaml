@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/bahn1075/openclaw-operator.git
+    repoURL: https://github.com/cozy-oci/openclaw-operator.git
     targetRevision: main
     path: charts/openclaw-operator
     helm:

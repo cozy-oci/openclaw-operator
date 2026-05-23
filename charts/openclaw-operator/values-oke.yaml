@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/openclaw-rocks/openclaw-operator
-  tag: "v0.30.0"
+  tag: "v0.34.4"
   pullPolicy: IfNotPresent
 
 metrics:

@@ -5483,9 +5483,13 @@ spec:
               plugins:
                 description: |-
                   Plugins is a list of plugins to install via init container.
-                  Each entry is an npm package name (e.g., "@martian-engineering/lossless-claw").
-                  An optional "npm:" prefix is accepted and stripped before installation.
-                  npm lifecycle scripts are disabled for security.
+                  Each entry is an npm package name (e.g., "@openclaw/matrix" or
+                  "@martian-engineering/lossless-claw"). An optional "npm:" prefix is
+                  accepted and stripped before installation.
+                  Installation goes through the OpenClaw CLI's ClawHub installer
+                  ("openclaw plugins install clawhub:<pkg>") rather than raw npm install
+                  so packages published with workspace:* dependency markers resolve
+                  correctly. npm lifecycle scripts are disabled for security.
                 items:
                   type: string
                 maxItems: 20
@@ -6051,6 +6055,21 @@ spec:
                       When true, the agent can create OpenClawSelfConfig resources to modify its own spec.
                     type: boolean
                 type: object
+              shareProcessNamespace:
+                default: true
+                description: |-
+                  ShareProcessNamespace enables PID namespace sharing between all containers
+                  in the pod. When true, the infrastructure (pause) container becomes PID 1
+                  and reaps zombie processes, which prevents accumulation of defunct helper
+                  processes (git, plugins, QMD memory, shells) under a Node.js gateway that
+                  does not call waitpid(). Defaults to true.
+
+                  Security note: enabling this lets every container in the pod see and signal
+                  every other container's processes. A compromised sidecar (Tailscale, Ollama,
+                  browser, custom) could send signals to the gateway and vice versa. Set to
+                  false to keep per-container PID isolation; you are then responsible for
+                  reaping zombies (e.g. by baking tini or dumb-init into the image).
+                type: boolean
               sidecarVolumes:
                 description: SidecarVolumes is a list of additional volumes to make
                   available to sidecar containers.
