@@ -19,4 +19,11 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
-
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: openclaw.rocks
+      kind: OpenClawInstance
+      name: openclaw
+      namespace: openclaw
+      jsonPointers:
+        - /spec/image/tag
